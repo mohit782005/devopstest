@@ -1,13 +1,13 @@
 {
-  "repoPath": "C:\\nexus-X\\test-repo",
-  "lastCommit": "",
-  "indexedAt": "2026-04-15T19:57:19.940Z",
+  "repoPath": "C:\\nexus-X\\devopstest",
+  "lastCommit": "21e1352510b1de76234faceffc9f4a225f780705",
+  "indexedAt": "2026-04-16T04:09:32.976Z",
   "stats": {
-    "files": 7,
-    "nodes": 42,
-    "edges": 66,
-    "communities": 2,
-    "processes": 3,
+    "files": 47,
+    "nodes": 293,
+    "edges": 713,
+    "communities": 17,
+    "processes": 22,
     "embeddings": 0
   }
 }

@@ -56,7 +56,7 @@ def main() -> None:
             output_dir=args.output_dir,
             llm=llm,
         )
-        result = app.invoke({"incident": incident})
+        result = app.invoke({"incident": incident, "repo_root": args.repo_root})
         print(f"Report written to {result['report_path']}")
     elif args.command == "doctor":
         locator = RepositoryLocator(args.repo_root, graph_project=args.graph_project)

@@ -1,7 +1,7 @@
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **test-repo** (42 symbols, 66 relationships, 3 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **devopstest** (293 symbols, 713 relationships, 22 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
@@ -17,7 +17,7 @@ This project is indexed by GitNexus as **test-repo** (42 symbols, 66 relationshi
 
 1. `gitnexus_query({query: "<error or symptom>"})` — find execution flows related to the issue
 2. `gitnexus_context({name: "<suspect function>"})` — see all callers, callees, and process participation
-3. `READ gitnexus://repo/test-repo/process/{processName}` — trace the full execution flow step by step
+3. `READ gitnexus://repo/devopstest/process/{processName}` — trace the full execution flow step by step
 4. For regressions: `gitnexus_detect_changes({scope: "compare", base_ref: "main"})` — see what your branch changed
 
 ## When Refactoring
@@ -56,10 +56,10 @@ This project is indexed by GitNexus as **test-repo** (42 symbols, 66 relationshi
 
 | Resource | Use for |
 |----------|---------|
-| `gitnexus://repo/test-repo/context` | Codebase overview, check index freshness |
-| `gitnexus://repo/test-repo/clusters` | All functional areas |
-| `gitnexus://repo/test-repo/processes` | All execution flows |
-| `gitnexus://repo/test-repo/process/{name}` | Step-by-step execution trace |
+| `gitnexus://repo/devopstest/context` | Codebase overview, check index freshness |
+| `gitnexus://repo/devopstest/clusters` | All functional areas |
+| `gitnexus://repo/devopstest/processes` | All execution flows |
+| `gitnexus://repo/devopstest/process/{name}` | Step-by-step execution trace |
 
 ## Self-Check Before Finishing
 
