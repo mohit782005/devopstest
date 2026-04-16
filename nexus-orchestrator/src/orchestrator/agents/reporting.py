@@ -14,33 +14,61 @@ def write_report(state: OrchestratorState, output_dir: Path, llm: OrchestratorLL
     output_dir.mkdir(parents=True, exist_ok=True)
     report_path = output_dir / f"{incident.id}.md"
 
-    # ── 1. Pick the best crash file — skip noise ───────────────────────────────
-    NOISE = (".json", ".txt", ".md", ".yml", ".yaml", ".toml", ".cfg", ".ini",
-             ".lock", ".sample")
-    source_location = next(
-        (loc for loc in locations if not any(loc.path.endswith(n) for n in NOISE)),
-        locations[0] if locations else None,
-    )
-
-    # ── 2. Read real source file & find crash line ─────────────────────────────
-    source_snippet = ""
-    source_file_content = ""
-    crash_line_no: int | None = None
+    # ── 1. Extract the crashing file DIRECTLY from the stack trace ────────────
+    # The stack trace is ground truth — always prefer it over graph text-search.
     stack_trace = incident.stack_trace or ""
+    crash_file_from_trace: str | None = None
+    crash_line_no: int | None = None
 
-    repo_root: Path | None = state.get("repo_root")
-
-    if source_location and stack_trace:
+    if stack_trace:
         import re
-        file_name = Path(source_location.path).name
-        m = re.search(
-            rf'File\s+"[^"]*{re.escape(file_name)}",\s+line\s+(\d+)',
+        # Find all `File "...", line N` entries in the stack trace
+        # The LAST one before the error is the actual crash site
+        trace_matches = re.findall(
+            r'File "([^"]+)",\s+line\s+(\d+)',
             stack_trace,
         )
-        if not m:
-            m = re.search(r"line (\d+)", stack_trace)
-        if m:
-            crash_line_no = int(m.group(1))
+        if trace_matches:
+            raw_path, raw_line = trace_matches[-1]
+            crash_line_no = int(raw_line)
+            # Convert absolute runner path → repo-relative path
+            # e.g. /home/runner/work/devopstest/devopstest/auth.py → auth.py
+            crash_file_from_trace = re.sub(
+                r"^.*/(?:work/[^/]+/[^/]+|devopstest)/", "", raw_path
+            )
+
+    # ── 2. Pick the best location entry for the crash file ────────────────────
+    NOISE = (".json", ".txt", ".md", ".yml", ".yaml", ".toml", ".cfg", ".ini",
+             ".lock", ".sample")
+
+    source_location = None
+    if crash_file_from_trace:
+        # Try to find matching location entry for metadata (blast_radius, rationale etc.)
+        fname = crash_file_from_trace.split("/")[-1]
+        source_location = next(
+            (loc for loc in locations if loc.path.endswith(fname)),
+            None,
+        )
+        # If not in graph, synthesise a minimal location object
+        if source_location is None:
+            from orchestrator.models import CodeLocation
+            source_location = CodeLocation(
+                path=crash_file_from_trace,
+                confidence=0.99,
+                rationale="extracted directly from stack trace",
+            )
+    else:
+        # Fall back to first non-noise graph location
+        source_location = next(
+            (loc for loc in locations if not any(loc.path.endswith(n) for n in NOISE)),
+            locations[0] if locations else None,
+        )
+
+    # ── 3. Read real source file & show crash-line context ────────────────────
+    source_snippet = ""
+    source_file_content = ""
+
+    repo_root: Path | None = state.get("repo_root")
 
     if source_location and repo_root:
         candidate = repo_root / source_location.path
