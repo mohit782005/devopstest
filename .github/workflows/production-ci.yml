@@ -47,7 +47,10 @@ jobs:
           NEXUS_LLM_BASE_URL: ${{ secrets.NEXUS_LLM_URL_SECRET }}
         run: |
           echo "Booting Orchestrator... Connecting to your remote Ngrok instances..."
+          mkdir -p ci_reports
           python -m orchestrator.main run incident.json --repo-root . --output-dir ci_reports
+          # Surface the report directly on the GitHub Actions Summary page
+          cat ci_reports/*.md >> $GITHUB_STEP_SUMMARY
 
       - name: Upload Forensic Report
         if: steps.tests.outcome == 'failure'
